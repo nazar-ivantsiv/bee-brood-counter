@@ -1,0 +1,6 @@
+jupyter==1.0.0
+matplotlib==1.5.1
+numpy==1.10.4
+scikit-learn==0.17.1
+scipy==0.17.0
+cv2==3.0.0
