@@ -8,7 +8,7 @@ class BeeFrame(object):
     WIN_NAME = 'Bee Frame'
 
     class Image(object):
-        """"""
+        """Image container."""
 
         NUM_CHANNELS = 3 # RGB
         IMG_SIZE = (64, 64) # Size of image
@@ -22,6 +22,13 @@ class BeeFrame(object):
                 self._img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
             self.height, self.width = self._img.shape[:2]
             self._img = self._img.copy()
+
+        def add_weighted(self, mask, mask_weight=0.7):
+            self._img = cv2.addWeighted(src1=self._img, \
+                                        alpha=1 - mask_weight, \
+                                        src2=mask, \
+                                        beta=mask_weight, \
+                                        gamma=0)
 
         def apply_mask(self, mask):
             self._img = cv2.bitwise_and(self._img, self._img, mask=mask)
@@ -91,7 +98,7 @@ class BeeFrame(object):
             'q' -- Quit
             's' -- Save acquired parameters
         """
-        cv2.namedWindow(self.WIN_NAME)  
+        cv2.namedWindow(self.WIN_NAME, cv2.WINDOW_NORMAL)  
         data = {}
         data['drawing'] = False # true if mouse is pressed
         data['ix_iy'] = -1, -1
@@ -111,12 +118,6 @@ class BeeFrame(object):
                 data['drawing'] = False
                 cv2.rectangle(data['tmp_img'],data['ix_iy'],(x,y),(0,255,0), 2)
                 data['x_y'] = x, y
-                print('cell size: {}x{}'
-                      ''.format(  data['ix_iy'][0], \
-                                    data['ix_iy'][1], \
-                                    abs(x - data['ix_iy'][0]), \
-                                    abs(y - data['ix_iy'][1]))
-                    )
 
         cv2.setMouseCallback(self.WIN_NAME, mouse_handler, data)
         while True:
@@ -168,12 +169,15 @@ if __name__ == '__main__':
     FILENAME = '003.png'
     PATH = '/home/chip/Dropbox/LITS/ML-003/dataset/processed_dataset/prespective_correction'
 
-    cv2.namedWindow(frame.WIN_NAME)
+    cv2.namedWindow(frame.WIN_NAME, cv2.WINDOW_NORMAL)
 
     frame.load_image(PATH, FILENAME)
     frame.image.hitogram_normalization()
     frame.image.blur()
-    frame.get_cell_size()
+    #frame.get_cell_size()
+
+    frame.image.add_weighted(mask=np.zeros( \
+        (frame.image.height, frame.image.width, frame.image.NUM_CHANNELS), dtype=np.uint8))
 
     frame.preview()
 
