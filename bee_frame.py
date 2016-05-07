@@ -6,7 +6,8 @@ import numpy as np
 class BeeFrame(object):
     """"""
     WIN_NAME = 'Bee Frame'
-
+    STEP_TO_CELL_SIZE_RATIO = 4  # 1/4
+    
     class Image(object):
         """Image container."""
 
@@ -38,31 +39,6 @@ class BeeFrame(object):
             self._img = cv2.blur(self._img, kernel)
             return self._img
 
-        def draw_circle(self, x, y, color):
-            cv2.circle(img=self._img,
-                       center=(    x + self.cell_size // 2, \
-                                   y + self.cell_size // 2), 
-                       radius=int(self.cell_size / 1.8),
-                       color=color,
-                       thickness=2)
-
-        def draw_rect(self, x, y, color):
-            cv2.rectangle(img=self._img, 
-                          pt1=(x, y), 
-                          pt2=(x + self.cell_size, y + self.cell_size), 
-                          color=color, 
-                          thickness=2)
-            
-        def draw_dot(self, x, y, color):
-            cv2.putText(img=self._img, 
-                        text='.', 
-                        org=(x, y + self.cell_size),  # TOP LEFT corner if bottomLeftOrigin=False
-                        fontFace=cv2.FONT_HERSHEY_SIMPLEX, 
-                        fontScale=4, 
-                        color=color, 
-                        thickness=1, 
-                        bottomLeftOrigin=False)
-
         def hitogram_normalization(self, clahe=False):
             """Image histogram normalization.
             Args:
@@ -78,15 +54,36 @@ class BeeFrame(object):
                 self._img = cv2.cvtColor(img_hist_equalized, cv2.COLOR_YCrCb2BGR)
             return self._img
 
+        def draw_circle(self, (x, y, end_x, end_y), img=np.array([])):
+            if not len(img):
+                img = self._img
+            width = end_x - x
+            height = end_y - y
+            cv2.ellipse(img=img, \
+                        center=(x + width//2, y + height//2), \
+                        axes=(width//2, height//2), 
+                        angle=0, 
+                        startAngle=0, 
+                        endAngle=360, 
+                        color=(0,255,0), 
+                        thickness=2)
+
+        def draw_rect(self, (x, y, end_x, end_y), img=np.array([])):
+            if not len(img):
+                img = self._img            
+            cv2.rectangle(img=img, 
+                          pt1=(x, y), 
+                          pt2=(end_x, end_y), 
+                          color=(0,255,0), 
+                          thickness=1)
+
     
     def __init__(self):
-        """Tool to measure the averange cell size and starting x, y coordinats."""
         self.cell_size = 60
         self.step_size = 30
         self.start_x = 0
         self.start_y = 0
-
-
+        
     def load_image(self, path, file_name):
         if hasattr(self, 'image'):
             del self.image
@@ -98,6 +95,7 @@ class BeeFrame(object):
             'q' -- Quit
             's' -- Save acquired parameters
         """
+
         cv2.namedWindow(self.WIN_NAME, cv2.WINDOW_NORMAL)  
         data = {}
         data['drawing'] = False # true if mouse is pressed
@@ -131,34 +129,28 @@ class BeeFrame(object):
                 # Save
                 self.cell_size = max(abs(data['x_y'][0] - data['ix_iy'][0]),\
                                     abs(data['x_y'][1] - data['ix_iy'][1]))
-                self.step_size = self.cell_size // 2
+                self.step_size = self.cell_size // self.STEP_TO_CELL_SIZE_RATIO
                 self.start_x, self.start_y = data['ix_iy']
                 break
         cv2.destroyAllWindows()
 
 
     
-    def sliding_window(self, start_x=0, start_y=0, use_pattern=False):
+    def sliding_window(self):
         """Slide a window across the image."""
-        odd_step = False
-        for y in xrange(start_y, self.image.height, self.step_size):
-            # Shift sliding window to the left on odd step to match chess board pattern.
-            if use_pattern and odd_step:
-                curr_x = start_x + self.step_size // 2
-            else:
-                curr_x = start_x
-            odd_step = not odd_step
-
-            for x in xrange(curr_x, self.image.width, self.step_size):
+        for y in xrange(0, self.image.height, self.step_size):
+            for x in xrange(0, self.image.width, self.step_size):
                 # yield the current window
                 window = self.image._img[y:y + self.cell_size, \
                                     x:x + self.cell_size]
                 if window.shape[0] == window.shape[1]:
                     yield (x, y, window)
 
-    def preview(self):
+    def preview(self, img=np.array([])):
+        if not len(img):
+            img = self._img
         while True:
-            cv2.imshow(self.WIN_NAME, self.image._img)
+            cv2.imshow(self.WIN_NAME, img)
             key_pressed = cv2.waitKey(1)
             if key_pressed == ord('q'):
                 # Quit
