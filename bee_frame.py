@@ -54,27 +54,29 @@ class BeeFrame(object):
                 self._img = cv2.cvtColor(img_hist_equalized, cv2.COLOR_YCrCb2BGR)
             return self._img
 
-        def draw_circle(self, (x, y, end_x, end_y), img=np.array([])):
+        def draw_circle(self, coords, img=np.array([])):
+            x, y, end_x, end_y = coords
             if not len(img):
                 img = self._img
             width = end_x - x
             height = end_y - y
             cv2.ellipse(img=img, \
                         center=(x + width//2, y + height//2), \
-                        axes=(width//2, height//2), 
-                        angle=0, 
-                        startAngle=0, 
-                        endAngle=360, 
-                        color=(0,255,0), 
+                        axes=(width//2, height//2),
+                        angle=0,
+                        startAngle=0,
+                        endAngle=360,
+                        color=(0,255,0),
                         thickness=2)
 
-        def draw_rect(self, (x, y, end_x, end_y), img=np.array([])):
+        def draw_rect(self, coords, img=np.array([])):
+            x, y, end_x, end_y = coords
             if not len(img):
-                img = self._img            
-            cv2.rectangle(img=img, 
-                          pt1=(x, y), 
-                          pt2=(end_x, end_y), 
-                          color=(0,255,0), 
+                img = self._img
+            cv2.rectangle(img=img,
+                          pt1=(x, y),
+                          pt2=(end_x, end_y),
+                          color=(0,255,0),
                           thickness=1)
 
     
@@ -138,8 +140,8 @@ class BeeFrame(object):
     
     def sliding_window(self):
         """Slide a window across the image."""
-        for y in xrange(0, self.image.height, self.step_size):
-            for x in xrange(0, self.image.width, self.step_size):
+        for y in range(0, self.image.height, self.step_size):
+            for x in range(0, self.image.width, self.step_size):
                 # yield the current window
                 window = self.image._img[y:y + self.cell_size, \
                                     x:x + self.cell_size]
