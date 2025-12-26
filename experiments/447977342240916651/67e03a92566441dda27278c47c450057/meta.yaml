@@ -1,0 +1,14 @@
+artifact_uri: /Users/chip/claude_code_experiments/bee-brood-counter/experiments/447977342240916651/67e03a92566441dda27278c47c450057/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '447977342240916651'
+lifecycle_stage: active
+run_id: 67e03a92566441dda27278c47c450057
+run_name: mobilenet_v2_tuning_20251209_233448
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1765319688665
+status: 1
+tags: []
+user_id: chip

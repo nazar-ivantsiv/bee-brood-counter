@@ -58,6 +58,10 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+bee_brood_counter/
+
+# Datasets
+dataset/
 
 # IDEs
 .vscode/
@@ -72,5 +76,5 @@ Thumbs.db
 
 # Model files (optional - uncomment if you don't want to track large model files)
 # models/*.ckpt
-# models/*.keras
+models/*.keras
 # models/*.h5

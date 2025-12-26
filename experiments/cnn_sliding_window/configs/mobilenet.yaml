@@ -1,0 +1,84 @@
+# MobileNetV2 Transfer Learning Configuration
+# Lightweight and fast with good accuracy
+
+data:
+  dataset_path: "./dataset"
+  positive_subdir: "positive"
+  negative_subdir: "negative"
+  img_size: [64, 64, 3]
+  train_split: 0.6
+  val_split: 0.2
+  test_split: 0.2
+  seed: 42
+
+augmentation:
+  enabled: true
+  rotation_factor: 1.0
+  flip_mode: "horizontal_and_vertical"
+  zoom_range: [-0.1, 0.1]
+  brightness_factor: 0.2
+  contrast_factor: 0.2
+  noise_stddev: 0.01
+
+model:
+  model_type: "mobilenet_v2"
+  input_shape: [64, 64, 3]
+  num_classes: 2
+  freeze_base: true  # Start with frozen base
+  base_trainable: false
+  global_pooling: "avg"
+  dense_units: [128]
+  dropout_rates: [0.3, 0.2]
+
+training:
+  batch_size: 32  # Larger batch size for transfer learning
+  epochs: 50  # Total for two-stage training
+  learning_rate: 0.001
+  optimizer: "adam"
+
+  # Learning rate schedule
+  lr_decay_enabled: true
+  lr_decay_rate: 0.95
+  lr_decay_steps: 50
+
+  # Class imbalance handling
+  use_class_weights: true
+  class_weight_ratio: 4.3
+
+  # Regularization
+  l2_reg: 1e-4
+  label_smoothing: 0.1
+
+  # Early stopping
+  early_stopping_patience: 15
+  early_stopping_monitor: "val_f1_score"
+  early_stopping_mode: "max"
+
+  # Model checkpoint
+  save_best_only: true
+  checkpoint_monitor: "val_f1_score"
+  checkpoint_mode: "max"
+
+  # Two-stage training
+  stage1_epochs: 15  # Train classifier head only
+  stage1_lr: 1e-3
+  stage2_epochs: 35  # Fine-tune entire model
+  stage2_lr: 1e-5
+
+cross_validation:
+  enabled: false
+  n_splits: 5
+  shuffle: true
+  stratified: true
+
+experiment:
+  tracking_uri: "./experiments"
+  experiment_name: "bee_brood_counter"
+  run_name: "mobilenet_v2_transfer"
+  log_models: true
+  log_artifacts: true
+
+# Global settings
+gpu_id: 0
+mixed_precision: true  # Enable for faster training
+verbose: 1

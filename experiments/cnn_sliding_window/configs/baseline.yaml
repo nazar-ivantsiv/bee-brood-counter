@@ -1,0 +1,76 @@
+# Baseline CNN Configuration
+# Original 4-layer ConvNet architecture
+
+data:
+  dataset_path: "./dataset"
+  positive_subdir: "positive"
+  negative_subdir: "negative"
+  img_size: [64, 64, 3]
+  train_split: 0.6
+  val_split: 0.2
+  test_split: 0.2
+  seed: 42
+
+augmentation:
+  enabled: true
+  rotation_factor: 1.0  # Full 360° rotation
+  flip_mode: "horizontal_and_vertical"
+  zoom_range: [-0.1, 0.1]
+  brightness_factor: 0.2
+  contrast_factor: 0.2
+  noise_stddev: 0.01
+
+model:
+  model_type: "baseline"
+  input_shape: [64, 64, 3]
+  num_classes: 2
+  conv1_filters: 16
+  conv2_filters: 16
+  fc_units: 64
+
+training:
+  batch_size: 16
+  epochs: 50
+  learning_rate: 0.005
+  optimizer: "adam"
+
+  # Learning rate schedule
+  lr_decay_enabled: true
+  lr_decay_rate: 0.96
+  lr_decay_steps: 100
+
+  # Class imbalance handling
+  use_class_weights: true
+  class_weight_ratio: 4.3
+
+  # Regularization
+  l2_reg: 0.0
+  label_smoothing: 0.0
+
+  # Early stopping
+  early_stopping_patience: 10
+  early_stopping_monitor: "val_f1_score"
+  early_stopping_mode: "max"
+
+  # Model checkpoint
+  save_best_only: true
+  checkpoint_monitor: "val_f1_score"
+  checkpoint_mode: "max"
+
+cross_validation:
+  enabled: false
+  n_splits: 5
+  shuffle: true
+  stratified: true
+
+experiment:
+  tracking_uri: "./experiments"
+  experiment_name: "bee_brood_counter"
+  run_name: "baseline_cnn_augmented"
+  log_models: true
+  log_artifacts: true
+
+# Global settings
+gpu_id: 0
+mixed_precision: false
+verbose: 1
